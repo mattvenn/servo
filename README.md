@@ -1,15 +1,10 @@
 # Servo testing
 
-![large move, no i](400.png)
+![setup](setup.jpg)
 
-![small move, no i](20.png)
+[video of servo following](https://www.youtube.com/watch?v=cL2WiDrB8N4&feature=youtu.be)
 
-![large move, with i](400 with i.png)
-
-![small move, with i](20 with i.png)
-
-
-# Zeigler-Nichols method
+## Zeigler-Nichols method
 
 https://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
 
