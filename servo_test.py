@@ -29,15 +29,18 @@ ki = float(sys.argv[2])
 kd = float(sys.argv[3])
 
 move_to = int(sys.argv[4])
-samples = 200
+samples = 300
 
 send_pid(kp, ki, kd)
 
+max_pos = 0
 for i in range(samples):
     bin = serial_port.read(6)
     time, curpos, posref = struct.unpack('<HHH', bin)
     if i == samples / 4:
         send(move_to)
+    if curpos > max_pos:
+        max_pos = curpos
     poss.append(curpos)
     times.append(time)
     refs.append(posref)
@@ -51,5 +54,5 @@ plt.xlabel('time ms')
 plt.ylabel('pulses')
 plt.grid(True)
 plt.title('PID %f,%f,%f @ 100Hz' % (kp, ki, kd))
-plt.ylim(0, move_to * 1.25)
+plt.ylim(0, max_pos * 1.25)
 plt.show()
