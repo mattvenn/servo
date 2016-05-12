@@ -30,8 +30,6 @@ So for no overshoot:
 
 ## Alternative PID alg  + tuning while loaded
 
-![oscillation.png](oscillation_2.png)
-
 * ku = 7.5
 * tu = 61 ms
 
