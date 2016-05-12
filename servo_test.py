@@ -45,6 +45,9 @@ for i in range(samples):
     times.append(time)
     refs.append(posref)
 
+if max_pos < move_to:
+    max_pos = move_to
+
 print(poss)
 
 import matplotlib.pyplot as plt

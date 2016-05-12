@@ -1,10 +1,17 @@
 #include <Encoder.h>
+#include <PID_v1.h>
 
 #define ENCB 2               //hardware ints
 #define ENCA 3               //hardware ints
 #define REV 9                //timer 1
 #define FOR 10               //timer 1
 #define LED 13
+
+//Define Variables we'll be connecting to
+double Setpoint, Input, Output;
+
+//Specify the links and initial tuning parameters
+PID myPID(&Input, &Output, &Setpoint,2.47, 0.03, 0.02, DIRECT);
 
 
 Encoder myEnc(ENCA, ENCB);
@@ -32,7 +39,7 @@ typedef struct
     unsigned int p;
     unsigned int i;
     unsigned int d;
-} PID;
+} PIDs;
 
 typedef struct
 {
@@ -52,41 +59,33 @@ void setup()
     digitalWrite(FOR,LOW);
     pinMode(REV, OUTPUT);
     digitalWrite(REV,LOW);
-
+/*
     while(true)
     {
-        if(Serial.available() == sizeof(PID))
+        if(Serial.available() == sizeof(PIDs))
         {
-            char buf[sizeof(PID)];
-            PID pid;
-            Serial.readBytes(buf, sizeof(PID));
-            memcpy(&pid, &buf, sizeof(PID));
+            char buf[sizeof(PIDs)];
+            PIDs pid;
+            Serial.readBytes(buf, sizeof(PIDs));
+            memcpy(&pid, &buf, sizeof(PIDs));
             kp = pid.p / 1000.0;
             ki = pid.i / 1000.0;
             kd = pid.d / 1000.0;
+            myPID.SetTunings(kp, ki, kd);
             digitalWrite(LED, HIGH);
             break;
         }
     }
-    
-    // pid init
-    pid_init();
+    */
+    myPID.SetOutputLimits(-127,127);
+    myPID.SetSampleTime(10);
 
     // turn on interrupts
     interrupts();
-}
 
-void pid_init()
-{
-    b0 = kp+ki+kd;
-    b1 = -kp-2*kd;
-    b2 = kd;
+    //turn the PID on
+    myPID.SetMode(AUTOMATIC);
 
-    yn = 0;
-    ynm1 = 0;
-    xn = 0;
-    xnm1 = 0;
-    xnm2 = 0;
 }
 
 void loop()
@@ -96,33 +95,26 @@ void loop()
         char buf[2];
         Serial.readBytes(buf, 2);
         memcpy(&posref, &buf, 2);
+      Setpoint = posref;
     }
+    Input = myEnc.read();
 
-    // 100hz
     if(calc)
     {
         calc = false;
-        //pid calculation
-        curpos = myEnc.read();
-        xn = float(posref - curpos);
         Response resp;
         resp.time = millis();
-        resp.posref = posref;
-        resp.curpos = curpos;
+        resp.posref = Setpoint;
+        resp.curpos = Input;
         char buf[sizeof(Response)];
         memcpy(&buf, &resp, sizeof(Response));
         for(int i = 0; i < sizeof(Response); i ++)
-            Serial.write(buf[i]);
-        yn = ynm1 + (b0*xn) + (b1*xnm1) + (b2*xnm2);
-        ynm1 = yn;
-
-        //write pwm values
-        drive(yn);
-
-        //set previous input and output values
-        xnm1 = xn;
-        xnm2 = xnm1;
+        Serial.write(buf[i]);
     }
+
+  myPID.Compute();
+
+  drive(Output);
 }
 
 void drive(int yn)
