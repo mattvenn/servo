@@ -28,6 +28,22 @@ So for no overshoot:
 
 ![small move](ziegler 20.png)
 
+## Alternative PID alg  + tuning while loaded
+
+![oscillation.png](oscillation_2.png)
+
+* ku = 7.5
+* tu = 61 ms
+
+* p = 2.47
+* i = 0.03
+* d = 0.02
+
+![large move](ziegler2 400.png)
+
+![small move](ziegler2 20.png)
+
+
 ## BOM
 
 * 12v DC brushed motor with 80:1 gearbox
